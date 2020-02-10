@@ -1,0 +1,40 @@
+version: '3'
+services:
+  jet:
+    image: hazelcast/hazelcast-jet:3.1
+    ports:
+      - 5701:5701
+    environment:
+      - "CLASSPATH=/cp/ch/qos/logback/logback-classic/1.1.2/logback-classic-1.1.2.jar:\
+                   /cp/ch/qos/logback/logback-core/1.1.2/logback-core-1.1.2.jar"
+      - >
+        JAVA_OPTS=-Dhazelcast.logging.type=slf4j
+                  -Dlogback.configurationFile=/usr/share/hazelcast/logback.xml
+    volumes:
+      - ~/.m2/repository:/cp:ro
+      - ./logback.xml:/usr/share/hazelcast/logback.xml:ro
+      - logs:/var/log
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.5.2
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - logs:/var/log:ro
+    depends_on:
+      - elasticsearch
+      - jet
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.5.2
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+
+volumes:
+  logs:

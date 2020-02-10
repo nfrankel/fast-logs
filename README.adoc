@@ -1,0 +1,3 @@
+== Fast Logs
+
+Support code for the https://www.youtube.com/watch?v=U71Ju3y40fE[similarly-named talk^]
